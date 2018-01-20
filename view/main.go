@@ -1,42 +1,18 @@
 package view
 
-import ui "github.com/gizak/termui"
+import "github.com/rivo/tview"
 
 func Layout() error {
-	if err := ui.Init(); err != nil {
-		return err
-	}
-
-	defer ui.Close()
-
-	list := ui.NewList()
-	list.Border = true
-	list.Items = []string{
-		"hoge",
-		"foo",
-	}
-	list.Height = ui.TermHeight() / 2
-	ui.Body.AddRows(
-		ui.NewRow(
-			ui.NewCol(12, 0, list),
-		),
-	)
-
-	ui.Body.Align()
-
-	ui.Render(ui.Body)
-	ui.Handle("/sys/kbd/q", func(event ui.Event) {
-		ui.StopLoop()
+	app := tview.NewApplication()
+	list := tview.NewList().
+		AddItem("hoge", "foo", 'a', nil).
+		AddItem("foo", "hoge", 'b', nil).
+		AddItem("Quit", "exit", 'q', func() {
+		app.Stop()
 	})
 
-	ui.Handle("sys/wnd/resize", func(event ui.Event) {
-		list.Height = ui.TermHeight() / 2
-		ui.Body.Width = ui.TermWidth()
-		ui.Body.Align()
-		ui.Clear()
-		ui.Render(ui.Body)
-	})
-
-	ui.Loop()
+	if err := app.SetRoot(list, true).SetFocus(list).Run(); err != nil {
+		panic(err)
+	}
 	return nil
 }

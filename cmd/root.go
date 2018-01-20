@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"path/filepath"
+	"github.com/crocus7724/korat/view"
 )
 
 var (
@@ -27,7 +28,7 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
 	Run: func(cmd *cobra.Command, args []string) {
-
+		view.Layout()
 	},
 }
 
