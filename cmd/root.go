@@ -8,12 +8,13 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"path/filepath"
-	"github.com/crocus7724/korat/view"
+	"github.com/crocus7724/korat/config"
+	"github.com/crocus7724/korat/app"
 )
 
 var (
 	cfgFile string
-	tokens  []string
+	token   string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -28,7 +29,15 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
 	Run: func(cmd *cobra.Command, args []string) {
-		view.Layout()
+		var config config.Config
+		viper.Unmarshal(&config)
+
+		if len(config.User) < 1 {
+			fmt.Println("korat require user in config.")
+			os.Exit(1)
+		}
+
+		app.Start(config)
 	},
 }
 
@@ -49,10 +58,7 @@ func init() {
 	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/korat/config)")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	rootCmd.PersistentFlags().StringArrayVar(&tokens, "tokens", nil, "github access tokens")
+	rootCmd.PersistentFlags().StringVar(&token, "github_token", "", "github access token")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -68,7 +74,6 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".korat" (without extension).
 		viper.AddConfigPath(filepath.Join(home, ".config", "korat"))
 		viper.SetConfigName("config")
 	}
@@ -80,5 +85,4 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
-
 }
