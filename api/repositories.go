@@ -6,18 +6,12 @@ import (
 	"github.com/crocus7724/korat/model"
 )
 
-type Repositories struct {
-}
-
 func GetViewerRepositories() ([]model.Repository, error) {
 	var query struct {
 		Viewer struct {
 			Repositories struct {
 				Nodes []model.Repository
-				PageInfo struct {
-					HasNextPage githubql.Boolean
-					EndCursor   githubql.String
-				}
+				PageInfo PageInfo
 			} `graphql:"repositories(first:50, orderBy: {field: UPDATED_AT, direction: DESC}, after: $repositoriesCursor)"`
 		}
 	}

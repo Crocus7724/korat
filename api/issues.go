@@ -13,10 +13,7 @@ func GetViewerIssues(repository githubql.String) ([]model.Issue, error) {
 				Issues struct {
 					Nodes []model.Issue
 
-					PageInfo struct {
-						HasNextPage githubql.Boolean
-						EndCursor   githubql.String
-					}
+					PageInfo PageInfo
 				} `graphql:"issues(first: 50, orderBy: {field: CREATED_AT, direction: DESC}, after: $issuesCursor, states: OPEN)"`
 			} `graphql:"repository(name: $name)"`
 		}
