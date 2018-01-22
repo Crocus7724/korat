@@ -6,7 +6,7 @@ import (
 	"github.com/crocus7724/korat/model"
 )
 
-func GetViewerIssues(repository githubql.String) ([]model.Issue, error) {
+func GetViewerIssues(repository githubql.String, states []githubql.IssueState) ([]model.Issue, error) {
 	var query struct {
 		Viewer struct {
 			Repository struct {
@@ -14,7 +14,7 @@ func GetViewerIssues(repository githubql.String) ([]model.Issue, error) {
 					Nodes []model.Issue
 
 					PageInfo PageInfo
-				} `graphql:"issues(first: 50, orderBy: {field: CREATED_AT, direction: DESC}, after: $issuesCursor, states: OPEN)"`
+				} `graphql:"issues(first: 50, orderBy: {field: CREATED_AT, direction: DESC}, after: $issuesCursor, states: $states)"`
 			} `graphql:"repository(name: $name)"`
 		}
 	}
@@ -22,6 +22,7 @@ func GetViewerIssues(repository githubql.String) ([]model.Issue, error) {
 	variables := map[string]interface{}{
 		"issuesCursor": (*githubql.String)(nil),
 		"name":         repository,
+		"states": states,
 	}
 
 	var issues []model.Issue
