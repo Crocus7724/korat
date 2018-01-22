@@ -1,13 +1,13 @@
 package view
 
 import (
-	"github.com/crocus7724/korat/api"
 	"github.com/rivo/tview"
 	"github.com/gdamore/tcell"
 	"github.com/crocus7724/korat/util"
+	"github.com/crocus7724/korat/model"
 )
 
-func NewRepositoriesView(rs []api.Repository, ch func(repository *api.Repository, event *tcell.EventKey)) *tview.Table {
+func NewRepositoriesView(rs []model.Repository, ch func(repository *model.Repository, event *tcell.EventKey)) *tview.Table {
 	count := len(rs)
 
 	if count > 0 {

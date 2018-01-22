@@ -1,9 +1,9 @@
 package view
 
 import (
-	"github.com/crocus7724/korat/api"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
+	"github.com/crocus7724/korat/model"
 )
 
 var categories = []string{
@@ -12,7 +12,7 @@ var categories = []string{
 	"PullRequests",
 }
 
-func NewRepositoryView(r *api.Repository, ch func(c string, event *tcell.EventKey)) *tview.Table {
+func NewRepositoryView(r *model.Repository, ch func(c string, event *tcell.EventKey)) *tview.Table {
 	table := tview.NewTable().
 		Select(0, 0).
 		SetSelectable(true, false)
