@@ -22,17 +22,18 @@ func init() {
 		SetScrollable(true).
 		SetDynamicColors(true)
 
-	messageView.SetBackgroundColor(tcell.ColorGreen)
+	messageView.SetBackgroundColor(tcell.ColorDeepSkyBlue)
+	messageView.SetTextColor(tcell.ColorLightGray)
 }
 
 func WriteMessageBox(message string) {
 	messageView.Clear()
-	fmt.Fprintf(messageView, message)
+	fmt.Fprint(messageView, message)
 	app.Draw()
 }
 
 func WriteFooterBox(message string) {
 	footerView.Clear()
-	fmt.Fprintf(footerView, message)
+	fmt.Fprint(footerView, message)
 	app.Draw()
 }
