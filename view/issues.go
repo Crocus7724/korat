@@ -5,6 +5,7 @@ import (
 	"github.com/gdamore/tcell"
 	"fmt"
 	"github.com/crocus7724/korat/model"
+	"github.com/crocus7724/korat/util"
 )
 
 func NewIssuesView(issues []model.Issue, ch func(issue *model.Issue, event *tcell.EventKey)) *tview.Table {
@@ -16,7 +17,7 @@ func NewIssuesView(issues []model.Issue, ch func(issue *model.Issue, event *tcel
 			numberCell := tview.NewTableCell(fmt.Sprintf("#%d", issue.Number))
 			table.SetCell(i, 0, numberCell)
 
-			titleCell := tview.NewTableCell(string(issue.Title))
+			titleCell := tview.NewTableCell(util.ReplaceBrackets(issue.Title))
 			table.SetCell(i, 1, titleCell)
 		}
 		table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
