@@ -1,7 +1,6 @@
 package app
 
 import (
-	"github.com/crocus7724/korat/api"
 	"github.com/crocus7724/korat/view"
 	"github.com/gdamore/tcell"
 	"path"
@@ -21,6 +20,8 @@ func ViewerRepository(r *model.Repository) {
 			switch c {
 			case "Issues":
 				ViewerIssues(r)
+			case "PullRequests":
+				ViewerPullRequests(r)
 			}
 		}
 	}))
