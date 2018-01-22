@@ -6,6 +6,11 @@ import (
 	"golang.org/x/oauth2"
 )
 
+type PageInfo struct {
+	HasNextPage githubql.Boolean
+	EndCursor   githubql.String
+}
+
 var client *githubql.Client
 
 func Init(url string, token string) {
