@@ -19,12 +19,12 @@ func NewRepositoriesView(rs []api.Repository, ch func(repository *api.Repository
 		table.Select(0, 0)
 
 		for i, repository := range rs {
-			nameCell := tview.NewTableCell(string(repository.Name))
-			table.SetCell(i, 1, nameCell)
-
 			updatedAtCell := tview.NewTableCell(util.GetTimeString(string(repository.UpdatedAt)))
 			updatedAtCell.SetTextColor(tcell.ColorRoyalBlue)
 			table.SetCell(i, 0, updatedAtCell)
+
+			nameCell := tview.NewTableCell(string(repository.Name))
+			table.SetCell(i, 1, nameCell)
 		}
 
 		table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {

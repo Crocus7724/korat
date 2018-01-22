@@ -3,34 +3,29 @@ package api
 import (
 	"context"
 	"github.com/shurcooL/githubql"
+	"github.com/crocus7724/korat/model"
 )
 
-type Repository struct {
-	Name        githubql.String
-	Description githubql.String
-	Url         githubql.String
-	UpdatedAt   githubql.String
-}
-
 type Repositories struct {
-	Nodes []Repository
-	PageInfo struct {
-		HasNextPage githubql.Boolean
-		EndCursor   githubql.String
-	}
 }
 
-func GetViewerRepositories() ([]Repository, error) {
+func GetViewerRepositories() ([]model.Repository, error) {
 	var query struct {
 		Viewer struct {
-			Repositories Repositories `graphql:"repositories(first:50, orderBy: {field: UPDATED_AT, direction: DESC}, after: $repositoriesCursor)"`
+			Repositories struct {
+				Nodes []model.Repository
+				PageInfo struct {
+					HasNextPage githubql.Boolean
+					EndCursor   githubql.String
+				}
+			} `graphql:"repositories(first:50, orderBy: {field: UPDATED_AT, direction: DESC}, after: $repositoriesCursor)"`
 		}
 	}
 	variables := map[string]interface{}{
 		"repositoriesCursor": (*githubql.String)(nil),
 	}
 
-	var repositories []Repository
+	var repositories []model.Repository
 
 	for {
 		if err := client.Query(context.Background(), &query, variables); err != nil {
