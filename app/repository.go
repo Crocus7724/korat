@@ -5,9 +5,10 @@ import (
 	"github.com/crocus7724/korat/view"
 	"github.com/gdamore/tcell"
 	"path"
+	"github.com/crocus7724/korat/model"
 )
 
-func ViewerRepository(r *api.Repository) {
+func ViewerRepository(r *model.Repository) {
 	view.PushPage(view.NewRepositoryView(r, func(c string, event *tcell.EventKey) {
 		if event.Rune() == 'b' {
 			switch c {
