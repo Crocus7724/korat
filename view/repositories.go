@@ -5,51 +5,62 @@ import (
 	"github.com/gdamore/tcell"
 	"github.com/crocus7724/korat/util"
 	"github.com/crocus7724/korat/model"
+	"sync"
 )
 
-func NewRepositoriesView(rs []model.Repository, ch func(repository *model.Repository, event *tcell.EventKey)) *tview.Table {
-	count := len(rs)
+type RepositoriesView struct {
+	count int
+	mutex *sync.Mutex
+	view  *tview.Table
+}
 
-	if count > 0 {
-		table := tview.NewTable()
-
-		table.SetSelectable(true, false)
-		table.SetTitle("Repositories")
-
-		table.Select(0, 0)
-
-		for i, repository := range rs {
-			updatedAtCell := tview.NewTableCell(util.GetTimeString(string(repository.UpdatedAt)))
-			updatedAtCell.SetTextColor(tcell.ColorRoyalBlue)
-			table.SetCell(i, 0, updatedAtCell)
-
-			nameCell := tview.NewTableCell(string(repository.Name))
-			table.SetCell(i, 1, nameCell)
-		}
-
-		table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-			row, _ := table.GetSelection()
-			r := rs[row]
-
-			ch(&r, event)
-
-			return event
-		})
-
-		table.SetSelectionChangedFunc(func(row, column int) {
-			d := rs[row].Description
-			WriteMessageBox(string(d))
-		})
-
-		d := rs[0].Description
-		WriteMessageBox(string(d))
-
-		return table
-	} else {
-		table := tview.NewTable()
-		table.SetSelectable(false, false)
-		table.SetCellSimple(0, 0, "There aren't repositories.")
-
-		return table
+func NewRepositoriesView(ch func(selected int, event *tcell.EventKey)) *RepositoriesView {
+	r := RepositoriesView{
+		view: tview.NewTable().
+			SetSelectable(true, false),
+		mutex: &sync.Mutex{},
+		count: 0,
 	}
+	r.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if r.count != 0 {
+			r, _ := r.view.GetSelection()
+			ch(r, event)
+		}
+		return event
+	})
+
+	return &r
+}
+
+func (r *RepositoriesView) AddRepositoriesCells(rs []model.Repository) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	for _, repository := range rs {
+		uc := tview.NewTableCell(util.GetTimeString(string(repository.UpdatedAt)))
+		uc.SetTextColor(tcell.ColorRoyalBlue)
+		r.view.SetCell(r.count, 0, uc)
+
+		nc := tview.NewTableCell(string(repository.Name))
+		r.view.SetCell(r.count, 1, nc)
+
+		r.count++
+	}
+	app.Draw()
+}
+
+func (r *RepositoriesView) Count() int {
+	return r.count
+}
+
+func (r *RepositoriesView) View() tview.Primitive {
+	return r.view
+}
+
+func (r *RepositoriesView) SetSelectionChangedFunc(changed func(row int)) {
+	r.view.SetSelectionChangedFunc(func(row, column int) {
+		if r.count > 0 {
+			changed(row)
+		}
+	})
+
 }

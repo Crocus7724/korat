@@ -15,6 +15,10 @@ var (
 	footer *tview.Flex
 )
 
+type View interface {
+	View() tview.Primitive
+}
+
 func Init() {
 	app = tview.NewApplication()
 	pages = tview.NewPages()
@@ -45,9 +49,9 @@ func Start() {
 	}
 }
 
-func PushPage(primitive tview.Primitive) {
+func PushPage(view View) {
 	pageCount++
-	pages.AddAndSwitchToPage(fmt.Sprintf("page-%d", pageCount), primitive,
+	pages.AddAndSwitchToPage(fmt.Sprintf("page-%d", pageCount), view.View(),
 		true)
 
 	app.Draw()
@@ -67,4 +71,10 @@ func PopPage() {
 	pageCount--
 	messageView.Clear()
 	footerView.Clear()
+}
+
+func SetEmptyCell(t *tview.Table, message string) {
+	t.SetCellSimple(0, 0, message).
+		SetSelectable(false, false)
+	app.Draw()
 }

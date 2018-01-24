@@ -6,7 +6,7 @@ import (
 	"github.com/crocus7724/korat/model"
 )
 
-func GetViewerIssues(repository githubql.String, states []githubql.IssueState) ([]model.Issue, error) {
+func GetViewerIssues(repository githubql.String, states []githubql.IssueState) (chan []model.Issue, chan error) {
 	var query struct {
 		Viewer struct {
 			Repository struct {
@@ -22,24 +22,28 @@ func GetViewerIssues(repository githubql.String, states []githubql.IssueState) (
 	variables := map[string]interface{}{
 		"issuesCursor": (*githubql.String)(nil),
 		"name":         repository,
-		"states": states,
+		"states":       states,
 	}
 
-	var issues []model.Issue
+	iChan := make(chan []model.Issue)
+	errChan := make(chan error)
+	go func() {
+		defer close(iChan)
+		defer close(errChan)
+		for {
+			if err := client.Query(context.Background(), &query, variables); err != nil {
+				errChan <- err
+				break
+			}
+			iChan <- query.Viewer.Repository.Issues.Nodes
 
-	for {
-		if err := client.Query(context.Background(), &query, variables); err != nil {
-			return nil, err
+			if ! query.Viewer.Repository.Issues.PageInfo.HasNextPage {
+				break
+			}
+
+			variables["issuesCursor"] = query.Viewer.Repository.Issues.PageInfo.EndCursor
 		}
+	}()
 
-		issues = append(issues, query.Viewer.Repository.Issues.Nodes...)
-
-		if ! query.Viewer.Repository.Issues.PageInfo.HasNextPage {
-			break
-		}
-
-		variables["issuesCursor"] = query.Viewer.Repository.Issues.PageInfo.EndCursor
-	}
-
-	return issues, nil
+	return iChan, errChan
 }

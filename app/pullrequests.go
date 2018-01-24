@@ -6,25 +6,42 @@ import (
 	"github.com/shurcooL/githubql"
 	"github.com/crocus7724/korat/view"
 	"github.com/gdamore/tcell"
+	"github.com/rivo/tview"
 )
 
 func ViewerPullRequests(repository *model.Repository) {
-	prs, err := api.GetViewerPullRequests(repository.Name, []githubql.PullRequestState{
-		//githubql.PullRequestStateOpen,
+	pChan, errChan := api.GetViewerPullRequests(repository.Name, []githubql.PullRequestState{
+		githubql.PullRequestStateOpen,
+		githubql.PullRequestStateClosed,
 	})
-
-	if err != nil {
-		view.ShowError(err)
-		return
-	}
-
-	v := view.NewPullRequestsView(prs, func(pr *model.PullRequest, event *tcell.EventKey) {
+	var prs []model.PullRequest
+	v := view.NewPullRequestsView(func(selected int, event *tcell.EventKey) {
+		p := prs[selected]
 		if event.Key() == tcell.KeyEnter {
 
 		} else if event.Rune() == 'b' {
-			OpenUrl(string(pr.Url))
+			OpenUrl(string(p.Url))
 		}
 	})
+	go func() {
+		for {
+			select {
+			case ps, ok := <-pChan:
+				if ok {
+					v.AddCells(ps)
+					prs = append(prs, ps...)
+				} else {
+					if len(prs) == 0 {
+						view.SetEmptyCell(v.View().(*tview.Table), "There aren't PullRequests")
+					}
+				}
+			case err, ok := <-errChan:
+				if ok {
+					view.ShowError(err)
+				}
+			}
+		}
+	}()
 
 	view.PushPage(v)
 }

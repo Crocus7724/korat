@@ -6,23 +6,48 @@ import (
 	"log"
 	"github.com/gdamore/tcell"
 	"github.com/crocus7724/korat/model"
+	"github.com/rivo/tview"
 )
 
 func ViewerRepositories() {
-	repositories, err := api.GetViewerRepositories()
+	rChan, errChan := api.GetViewerRepositories()
+	var rs []model.Repository
 
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-	v := view.NewRepositoriesView(repositories,
-		func(repository *model.Repository, event *tcell.EventKey) {
-			if event.Key() == tcell.KeyEnter {
-				ViewerRepository(repository)
-			} else if event.Rune() == 'b' {
-				OpenUrl(string(repository.Url))
-			} else if event.Rune() == 'q' {
-				view.PopPage()
+	v := view.NewRepositoriesView(func(selected int, event *tcell.EventKey) {
+		r := rs[selected]
+		if event.Key() == tcell.KeyEnter {
+			ViewerRepository(&r)
+		} else if event.Rune() == 'b' {
+			OpenUrl(string(r.Url))
+		} else if event.Rune() == 'q' {
+			view.PopPage()
+		}
+	})
+
+	v.SetSelectionChangedFunc(func(row int) {
+		r := rs[row]
+		view.WriteMessageBox(string(r.Description))
+	})
+
+	go func() {
+		for {
+			select {
+			case r, ok :=<-rChan:
+				if ok {
+					rs = append(rs, r...)
+					v.AddRepositoriesCells(r)
+				} else {
+					if len(rs) == 0 {
+						view.SetEmptyCell(v.View().(*tview.Table), "There aren't repositories")
+					}
+					return
+				}
+			case err, ok := <-errChan:
+				if ok {
+					log.Fatal(err)
+				}
 			}
-		})
+		}
+	}()
 	view.PushPage(v)
 }

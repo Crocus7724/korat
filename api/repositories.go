@@ -6,7 +6,7 @@ import (
 	"github.com/crocus7724/korat/model"
 )
 
-func GetViewerRepositories() ([]model.Repository, error) {
+func GetViewerRepositories() (chan []model.Repository, chan error) {
 	var query struct {
 		Viewer struct {
 			Repositories struct {
@@ -19,20 +19,25 @@ func GetViewerRepositories() ([]model.Repository, error) {
 		"repositoriesCursor": (*githubql.String)(nil),
 	}
 
-	var repositories []model.Repository
+	rChan := make(chan []model.Repository)
+	eChan := make(chan error)
 
-	for {
-		if err := client.Query(context.Background(), &query, variables); err != nil {
-			return nil, err
+	go func() {
+		defer close(rChan)
+		defer close(eChan)
+		for {
+			if err := client.Query(context.Background(), &query, variables); err != nil {
+				eChan <- err
+				break
+			}
+
+			rChan <- query.Viewer.Repositories.Nodes
+			if !query.Viewer.Repositories.PageInfo.HasNextPage {
+				break
+			}
+			variables["repositoriesCursor"] = githubql.NewString(query.Viewer.Repositories.PageInfo.EndCursor)
 		}
+	}()
 
-		repositories = append(repositories, query.Viewer.Repositories.Nodes...)
-
-		if !query.Viewer.Repositories.PageInfo.HasNextPage {
-			break
-		}
-		variables["repositoriesCursor"] = githubql.NewString(query.Viewer.Repositories.PageInfo.EndCursor)
-	}
-
-	return repositories, nil
+	return rChan, eChan
 }

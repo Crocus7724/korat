@@ -6,32 +6,52 @@ import (
 	"fmt"
 	"github.com/crocus7724/korat/model"
 	"github.com/crocus7724/korat/util"
+	"sync"
 )
 
-func NewIssuesView(issues []model.Issue, ch func(issue *model.Issue, event *tcell.EventKey)) *tview.Table {
-	if len(issues) > 0 {
-		table := tview.NewTable().
-			SetSelectable(true, false)
+type IssuesView struct {
+	view  *tview.Table
+	count int
+	mutex *sync.Mutex
+}
 
-		for i, issue := range issues {
-			numberCell := tview.NewTableCell(fmt.Sprintf("#%d", issue.Number))
-			table.SetCell(i, 0, numberCell)
-
-			titleCell := tview.NewTableCell(util.ReplaceBrackets(issue.Title))
-			table.SetCell(i, 1, titleCell)
-		}
-		table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-			row, _ := table.GetSelection()
-			issue := issues[row]
-			ch(&issue, event)
-
-			return event
-		})
-		return table
-	} else {
-		return tview.NewTable().
-			SetSelectable(false, false).
-			SetCellSimple(0, 0, "There aren't issues")
+func NewIssuesView(ch func(selected int, event *tcell.EventKey)) *IssuesView {
+	iv := IssuesView{
+		view: tview.NewTable().
+			SetSelectable(true, false),
+		count: 0,
+		mutex: &sync.Mutex{},
 	}
 
+	iv.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if iv.count != 0 {
+			row, _ := iv.view.GetSelection()
+			ch(row, event)
+		}
+		return event
+	})
+	return &iv
+}
+
+func (i *IssuesView) AddIssueCells(issues []model.Issue) {
+	i.mutex.Lock()
+	defer i.mutex.Unlock()
+	for _, issue := range issues {
+		numberCell := tview.NewTableCell(fmt.Sprintf("#%d", issue.Number))
+		i.view.SetCell(i.count, 0, numberCell)
+
+		titleCell := tview.NewTableCell(util.ReplaceBrackets(issue.Title))
+		i.view.SetCell(i.count, 1, titleCell)
+
+		i.count++
+	}
+	app.Draw()
+}
+
+func (i *IssuesView) View() tview.Primitive {
+	return i.view
+}
+
+func (i *IssuesView) Count() int {
+	return i.count
 }

@@ -8,7 +8,7 @@ import (
 )
 
 func ViewerRepository(r *model.Repository) {
-	view.PushPage(view.NewRepositoryView(r, func(c string, event *tcell.EventKey) {
+	repositoryView := view.NewRepositoryView(r, func(c string, event *tcell.EventKey) {
 		if event.Rune() == 'b' {
 			switch c {
 			case "Issues":
@@ -24,5 +24,6 @@ func ViewerRepository(r *model.Repository) {
 				ViewerPullRequests(r)
 			}
 		}
-	}))
+	})
+	view.PushPage(repositoryView)
 }
