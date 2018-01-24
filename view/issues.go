@@ -1,7 +1,7 @@
 package view
 
 import (
-	"github.com/rivo/tview"
+	"github.com/crocus7724/tview"
 	"github.com/gdamore/tcell"
 	"fmt"
 	"github.com/crocus7724/korat/model"

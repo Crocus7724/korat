@@ -3,10 +3,9 @@ package app
 import (
 	"github.com/crocus7724/korat/api"
 	"github.com/crocus7724/korat/view"
-	"log"
 	"github.com/gdamore/tcell"
 	"github.com/crocus7724/korat/model"
-	"github.com/rivo/tview"
+	"github.com/crocus7724/tview"
 )
 
 func ViewerRepositories() {
@@ -32,7 +31,7 @@ func ViewerRepositories() {
 	go func() {
 		for {
 			select {
-			case r, ok :=<-rChan:
+			case r, ok := <-rChan:
 				if ok {
 					rs = append(rs, r...)
 					v.AddRepositoriesCells(r)
@@ -44,7 +43,8 @@ func ViewerRepositories() {
 				}
 			case err, ok := <-errChan:
 				if ok {
-					log.Fatal(err)
+					view.ShowError(err)
+					return
 				}
 			}
 		}

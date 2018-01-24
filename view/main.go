@@ -1,7 +1,7 @@
 package view
 
 import (
-	"github.com/rivo/tview"
+	"github.com/crocus7724/tview"
 	"fmt"
 	"github.com/gdamore/tcell"
 )
@@ -21,6 +21,7 @@ type View interface {
 
 func Init() {
 	app = tview.NewApplication()
+
 	pages = tview.NewPages()
 	wrapper = tview.NewFlex()
 

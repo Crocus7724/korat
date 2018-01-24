@@ -5,7 +5,7 @@ import (
 	"github.com/crocus7724/korat/model"
 	"github.com/crocus7724/korat/view"
 	"github.com/gdamore/tcell"
-	"github.com/rivo/tview"
+	"github.com/crocus7724/tview"
 	"github.com/shurcooL/githubql"
 )
 
@@ -41,6 +41,7 @@ func ViewerIssues(r *model.Repository) {
 			case err, ok := <-errChan:
 				if ok {
 					view.ShowError(err)
+					return
 				}
 			}
 		}

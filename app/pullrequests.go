@@ -6,7 +6,7 @@ import (
 	"github.com/shurcooL/githubql"
 	"github.com/crocus7724/korat/view"
 	"github.com/gdamore/tcell"
-	"github.com/rivo/tview"
+	"github.com/crocus7724/tview"
 )
 
 func ViewerPullRequests(repository *model.Repository) {
@@ -34,10 +34,13 @@ func ViewerPullRequests(repository *model.Repository) {
 					if len(prs) == 0 {
 						view.SetEmptyCell(v.View().(*tview.Table), "There aren't PullRequests")
 					}
+
+					return
 				}
 			case err, ok := <-errChan:
 				if ok {
 					view.ShowError(err)
+					return
 				}
 			}
 		}
