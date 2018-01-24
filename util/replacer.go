@@ -6,6 +6,6 @@ import (
 )
 
 func ReplaceBrackets(s githubql.String) string {
-	r := strings.Replace(string(s), "[", "\\[", -1)
-	return strings.Replace(r, "]", "\\]", -1)
+	r := strings.Replace(string(s), "[", "［", -1)
+	return strings.Replace(r, "]", "］", -1)
 }
